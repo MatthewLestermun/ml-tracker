@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0D0E11">
+
+  <!-- PWA: чтобы сайт можно было поставить на телефон как приложение -->
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="ML">
+
+  <title>ML Трекер</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Unbounded:wght@700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <main class="app">
+
+    <!-- ===================== 1. ПРИВЫЧКИ ===================== -->
+    <section class="screen" data-screen="habits">
+      <p class="terminal">&gt; <span class="nick">player</span> --habits<span class="cursor">_</span></p>
+
+      <div class="hero">
+        <div class="ring">
+          <svg viewBox="0 0 120 120">
+            <circle class="ring-bg" cx="60" cy="60" r="52"></circle>
+            <circle class="ring-fill" id="ring-fill" cx="60" cy="60" r="52"></circle>
+          </svg>
+          <div class="ring-text">
+            <span class="ring-percent" id="ring-percent">0%</span>
+            <span class="ring-count" id="today-progress">0/5</span>
+          </div>
+        </div>
+
+        <div class="hero-info">
+          <p class="muted small" id="today-date"></p>
+          <h1>День <span class="accent" id="day-number">1</span><span class="muted">/<span class="days-total">90</span></span></h1>
+          <div class="chips">
+            <span class="chip">🔥 <b id="streak">0</b> подряд</span>
+            <span class="chip">⚡ <b id="xp-today">0</b> XP</span>
+            <span class="chip">↗ LVL <b id="habit-level">1</b></span>
+          </div>
+        </div>
+      </div>
+
+      <ul class="habits" id="habit-list"></ul>
+
+      <div class="adder">
+        <button class="add-toggle" type="button">+ своя привычка</button>
+        <form class="add-form inline" id="habit-form">
+          <input class="input" name="name" placeholder="Например: 10 страниц книги" maxlength="40" required>
+          <button class="btn btn-primary" type="submit">OK</button>
+        </form>
+      </div>
+
+      <div class="grid-head">
+        <h2 class="block-title">// <span class="days-total">90</span> дней</h2>
+        <span class="grid-info" id="grid-info">тапни на клетку</span>
+      </div>
+      <div class="grid" id="grid"></div>
+      <div class="legend">
+        <span><i class="cell full"></i>всё</span>
+        <span><i class="cell partial"></i>часть</span>
+        <span><i class="cell missed"></i>пропуск</span>
+      </div>
+    </section>
+
+    <!-- ===================== 2. ЗАДАЧИ ===================== -->
+    <section class="screen" data-screen="tasks">
+      <div class="screen-head">
+        <p class="terminal">&gt; <span class="nick">player</span> --tasks<span class="cursor">_</span></p>
+        <button class="csv-btn" id="tasks-csv" type="button">⇩ Excel</button>
+      </div>
+      <h1 class="screen-title">Задачи</h1>
+      <div class="chips" id="task-chips"></div>
+
+      <div class="adder">
+        <button class="add-toggle" type="button">+ новая задача</button>
+        <form class="add-form" id="task-form">
+          <input class="input" name="title" placeholder="Что сделать?" maxlength="80" required>
+          <div class="form-row">
+            <label class="field">Срок
+              <input class="input" type="date" name="due">
+            </label>
+            <label class="field">Приоритет
+              <select class="input" name="priority">
+                <option value="urgent">🔴 Срочно</option>
+                <option value="high">🟠 Высокий</option>
+                <option value="mid" selected>🟡 Средний</option>
+                <option value="low">⚪ Низкий</option>
+              </select>
+            </label>
+          </div>
+          <label class="field">Категория
+            <select class="input" name="category">
+              <option>Код</option>
+              <option>Клиенты</option>
+              <option>Контент</option>
+              <option>Учёба</option>
+              <option>Жизнь</option>
+            </select>
+          </label>
+          <div class="form-row">
+            <button class="btn btn-ghost" type="button" data-cancel>Отмена</button>
+            <button class="btn btn-primary" type="submit">Добавить</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="seg" id="task-filter">
+        <button type="button" data-filter="active" class="active">Активные</button>
+        <button type="button" data-filter="today">Сегодня</button>
+        <button type="button" data-filter="done">Готово</button>
+      </div>
+      <ul class="list" id="task-list"></ul>
+    </section>
+
+    <!-- ===================== 3. КЛИЕНТЫ ===================== -->
+    <section class="screen" data-screen="clients">
+      <div class="screen-head">
+        <p class="terminal">&gt; <span class="nick">player</span> --clients<span class="cursor">_</span></p>
+        <button class="csv-btn" id="clients-csv" type="button">⇩ Excel</button>
+      </div>
+      <h1 class="screen-title">Клиенты</h1>
+
+      <!-- Воронка: сколько написал → сколько ответили → сколько купили -->
+      <div class="funnel" id="funnel"></div>
+      <div class="chips" id="client-chips"></div>
+
+      <div class="adder">
+        <button class="add-toggle" type="button">+ новый клиент</button>
+        <form class="add-form" id="client-form">
+          <input class="input" name="name" placeholder="Кто: барбершоп «Лезвие»" maxlength="40" required>
+          <div class="form-row">
+            <label class="field">Что продаю
+              <input class="input" name="offer" placeholder="Лендинг" maxlength="40">
+            </label>
+            <label class="field">Цена, $
+              <input class="input" type="number" name="price" min="0" step="1" inputmode="decimal" placeholder="150">
+            </label>
+          </div>
+          <div class="form-row">
+            <label class="field">Контакт
+              <input class="input" name="contact" placeholder="@telegram / телефон" maxlength="60">
+            </label>
+            <label class="field">Когда написать
+              <input class="input" type="date" name="nextDate" data-default-today>
+            </label>
+          </div>
+          <div class="form-row">
+            <button class="btn btn-ghost" type="button" data-cancel>Отмена</button>
+            <button class="btn btn-primary" type="submit">Добавить</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="seg" id="client-filter">
+        <button type="button" data-filter="active" class="active">В работе</button>
+        <button type="button" data-filter="paid">Оплатили</button>
+        <button type="button" data-filter="all">Все</button>
+      </div>
+      <ul class="list" id="client-list"></ul>
+    </section>
+
+    <!-- ===================== 4. ДЕНЬГИ ===================== -->
+    <section class="screen" data-screen="money">
+      <div class="screen-head">
+        <p class="terminal">&gt; <span class="nick">player</span> --money<span class="cursor">_</span></p>
+        <button class="csv-btn" id="money-csv" type="button">⇩ Excel</button>
+      </div>
+
+      <div class="money-hero">
+        <p class="muted small">Заработано за челлендж</p>
+        <p class="money-big"><span id="money-earned">$0</span> <span class="money-goal" id="money-goal">→ $1000</span></p>
+        <div class="bar"><div class="bar-fill" id="money-fill"></div></div>
+        <div class="money-row">
+          <span id="money-percent">0%</span>
+          <span id="money-left">осталось $1000</span>
+        </div>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat"><span>Расходы</span><b id="money-spent">$0</b></div>
+        <div class="stat"><span>Чистыми</span><b id="money-net">$0</b></div>
+      </div>
+
+      <p class="forecast" id="money-forecast"></p>
+
+      <div class="adder">
+        <button class="add-toggle" type="button">+ доход / расход</button>
+        <form class="add-form" id="money-form">
+          <div class="seg seg-type" id="money-type">
+            <button type="button" data-type="in" class="active">+ Доход</button>
+            <button type="button" data-type="out">− Расход</button>
+          </div>
+          <div class="form-row">
+            <label class="field">Сумма, $
+              <input class="input" type="number" name="amount" min="0.01" step="0.01" inputmode="decimal" placeholder="50" required>
+            </label>
+            <label class="field">Дата
+              <input class="input" type="date" name="date" data-default-today>
+            </label>
+          </div>
+          <label class="field">За что
+            <input class="input" name="note" placeholder="Заказ на Kwork / реклама" maxlength="60">
+          </label>
+          <div class="form-row">
+            <button class="btn btn-ghost" type="button" data-cancel>Отмена</button>
+            <button class="btn btn-primary" type="submit">Записать</button>
+          </div>
+        </form>
+      </div>
+
+      <h2 class="block-title">// история</h2>
+      <div id="money-table"></div>
+    </section>
+
+    <!-- ===================== 5. УРОВЕНЬ ===================== -->
+    <section class="screen" data-screen="level">
+      <p class="terminal">&gt; <span class="nick">player</span> --level<span class="cursor">_</span></p>
+
+      <div class="level-hero">
+        <div class="lvl-badge"><small>LVL</small><b id="lvl-number">1</b></div>
+        <div class="lvl-info">
+          <p class="lvl-title" id="lvl-title">Новичок</p>
+          <div class="bar"><div class="bar-fill" id="xp-fill"></div></div>
+          <p class="muted small" id="xp-text">0 / 500 XP</p>
+        </div>
+      </div>
+
+      <div class="stat-grid" id="level-stats"></div>
+
+      <h2 class="block-title">// откуда XP</h2>
+      <div class="breakdown" id="xp-breakdown"></div>
+
+      <h2 class="block-title">// достижения</h2>
+      <div class="badges" id="badges"></div>
+
+      <h2 class="block-title">// данные</h2>
+      <div class="data-box">
+        <p class="backup-status" id="backup-status"></p>
+        <div class="form-row">
+          <button class="btn btn-primary" id="backup-save" type="button">⇩ Сохранить копию</button>
+          <button class="btn btn-ghost" id="backup-load" type="button">⇧ Загрузить</button>
+        </div>
+        <input type="file" id="backup-file" accept=".json,application/json" hidden>
+        <p class="muted small hint">Данные хранятся только в этом браузере. Сохраняй копию раз в неделю — файл можно загрузить на другом устройстве.</p>
+      </div>
+
+      <button class="btn btn-ghost settings-btn" id="open-settings" type="button">⚙ Настройки челленджа</button>
+    </section>
+
+  </main>
+
+  <!-- Приветствие при первом запуске (и настройки — то же окно) -->
+  <div class="welcome" id="welcome">
+    <form class="welcome-box" id="settings-form">
+      <div class="welcome-logo">ML<span class="cursor">_</span></div>
+      <h1 class="welcome-title" id="welcome-title">Жизнь как игра</h1>
+      <p class="muted small welcome-text" id="welcome-text">
+        Привычки, задачи, клиенты и деньги — в одном месте, с уровнями и XP.
+        Данные хранятся только на твоём устройстве.
+      </p>
+
+      <label class="field">Как тебя зовут?
+        <input class="input" name="name" placeholder="Например: Дима" maxlength="20" required>
+      </label>
+      <div class="form-row">
+        <label class="field">Старт челленджа
+          <input class="input" type="date" name="start" required>
+        </label>
+        <label class="field">Дней
+          <input class="input" type="number" name="days" min="7" max="365" step="1" value="90" required>
+        </label>
+      </div>
+      <label class="field">Цель, $
+        <input class="input" type="number" name="goal" min="1" step="1" value="1000" inputmode="decimal" required>
+      </label>
+
+      <div class="form-row">
+        <button class="btn btn-ghost" type="button" id="settings-cancel">Отмена</button>
+        <button class="btn btn-primary" type="submit" id="settings-submit">Поехали →</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Всплывающая плашка: «День закрыт», «Level up» и т. п. -->
+  <div class="toast" id="toast"></div>
+
+  <!-- Нижнее меню -->
+  <nav class="tabbar">
+    <button class="tab" data-tab="habits" type="button"><span class="tab-icon">✓</span>Привычки</button>
+    <button class="tab" data-tab="tasks" type="button"><span class="tab-icon">☰</span>Задачи</button>
+    <button class="tab" data-tab="clients" type="button"><span class="tab-icon">◎</span>Клиенты</button>
+    <button class="tab" data-tab="money" type="button"><span class="tab-icon">$</span>Деньги</button>
+    <button class="tab" data-tab="level" type="button"><span class="tab-icon">↗</span>Уровень</button>
+  </nav>
+
+  <!-- Порядок важен: сначала общие функции (core), в конце запуск (app) -->
+  <script src="js/core.js"></script>
+  <script src="js/habits.js"></script>
+  <script src="js/tasks.js"></script>
+  <script src="js/clients.js"></script>
+  <script src="js/money.js"></script>
+  <script src="js/level.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
